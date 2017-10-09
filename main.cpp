@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 
-#include "stringlistmodel.h"
+#include "stringsmodel.h"
 
 #include <iostream>
 
@@ -18,49 +18,23 @@ int main(int argc, char** argv)
 {
     QApplication app(argc, argv);
 
-    //    MainWindow w;
-    //    w.show();
+//    MainWindow w;
+//    w.show();
 
-    QSplitter* splitter = new QSplitter;
+    QSplitter splitter;
+    QListView* p_list_view = new QListView(&splitter);
 
-    auto tree = new QTreeView(splitter);
+    auto strings = QDir(QDir::currentPath()).entryList(QDir::Filter::Files);
+    StringsModel model(strings);
+    p_list_view->setModel(&model);
 
-    QFileSystemModel *model = new QFileSystemModel;
-    QModelIndex parentIndex = model->setRootPath(QDir::currentPath());
-
-    tree->setModel(model);
-    tree->setRootIndex(model->index(QDir::currentPath()));
-
-    QListView* list = new QListView(splitter);
-
-    QStringList strings;
-    strings << "1" << "2" << "3";
-
-    StringListModel* strmodel = new StringListModel(strings, nullptr);
-    list->setModel(strmodel);
-
-
-    splitter->show();
-
-    std::chrono::seconds secs(3);
-    QTimer::singleShot(std::chrono::milliseconds(secs).count(), [model, &parentIndex](){
-        int numRows = model->rowCount(parentIndex);
-        qDebug() << numRows;
-        for (int row = 0; row < numRows; ++row) {
-            QModelIndex index = model->index(row, 0, parentIndex);
-            QString text = model->data(index, Qt::DisplayRole).toString();
-            // Display the text in a widget.
-            qDebug() << text;
-        }
-    });
-
-
-    QTimer::singleShot(std::chrono::milliseconds(secs).count(), [&]()
+    p_list_view->connect(p_list_view, &QListView::clicked, [&model](const QModelIndex& index)
     {
-        strmodel->insertRows(0, 1, QModelIndex());
-        auto index = strmodel->index(0);
-        strmodel->setData(index, QString("boom"), Qt::EditRole);
+        model.insertRows(index.row(), 1, index);
+        model.setData(model.index(index.row()), "woohoo", Qt::EditRole);
     });
+
+    splitter.show();
 
     return app.exec();
 }

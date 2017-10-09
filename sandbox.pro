@@ -16,11 +16,11 @@ CONFIG += c++14
 SOURCES += \
     mainwindow.cpp \
     main.cpp \
-    stringlistmodel.cpp
+    stringsmodel.cpp
 
 HEADERS  += \
     mainwindow.h \
-    stringlistmodel.h
+    stringsmodel.h
 
 FORMS    += \
     mainwindow.ui
